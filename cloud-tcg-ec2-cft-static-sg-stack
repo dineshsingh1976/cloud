@@ -1,0 +1,38 @@
+{
+
+	"Parameters" :{
+			"InstanceTypeParameter" : {
+			"Type" : "String",
+			"Default":"t2.micro",
+			"AllowedValues": ["t2.micro","m1.small","m1.large"],
+			"Description" : "Enter t2.micro, m1,sall, or m1.large . default is t2.micro"
+		},
+	"SgStackName": {
+		"Description":"Name of an active cloudformation stack that contains the networking resources, such as the subnet",
+		"Type":"String",
+		"Default" : "CloudTcgStaticSgCft4"
+	}
+},
+    "Resources": {
+        "cloudTcgServerCft": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+				"ImageId":"{{resolve:ssm:/cloud-tcg-param/ImageId:1}}" ,
+				"InstanceType": {"Ref" : "InstanceTypeParameter"},
+			"KeyName":"{{resolve:ssm:/cloud-tcg-param/KeyName:1}}",
+			"SecurityGroupIds":[ {
+			"Fn::ImportValue":{
+				 "Fn::Sub": "${SgStackName}-CTcgStaticcSg"
+			}
+			}],
+			"SubnetId":"{{resolve:ssm:/cloud-tcg-param/SubnetId:1}}",
+			"Tags":[
+			{
+			  "Key":"Name",
+			  "Value": "withSSM"
+			}
+			] 
+        }
+    }
+}
+}
